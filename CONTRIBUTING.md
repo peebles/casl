@@ -73,3 +73,12 @@ The commit message format is borrowed from Angular projects and you can find [mo
 [github]: https://github.com/stalniy/casl
 [gitter]: https://gitter.im/stalniy-casl/casl
 [js-style-guide]: https://github.com/airbnb/javascript
+
+## Getting Started
+
+```sh
+npm ci
+npm run bootstrap
+(cd packages/casl-ability/; npm run test)
+(cd packages/casl-ability/; npm run prerelease)
+```

@@ -46,7 +46,7 @@ export class AbilityBuilder {
     this.subjectName = subjectName;
   }
 
-  can(actions, subject, conditionsOrFields, conditions) {
+  can(actions, subject, scopeOrConditionsOrFields, conditionsOrFields, conditions) {
     if (!isStringOrNonEmptyArray(actions)) {
       throw new TypeError('AbilityBuilder#can expects the first parameter to be an action or array of actions');
     }
@@ -58,6 +58,17 @@ export class AbilityBuilder {
     }
 
     const rule = { actions, subject: subjectName };
+
+    if (scopeOrConditionsOrFields instanceof Function
+     || (Array.isArray(scopeOrConditionsOrFields)
+         && (scopeOrConditionsOrFields[0] instanceof Function))) {
+      rule.scope = scopeOrConditionsOrFields;
+    } else {
+      /* eslint-disable-next-line no-param-reassign */
+      conditions = conditionsOrFields;
+      /* eslint-disable-next-line no-param-reassign */
+      conditionsOrFields = scopeOrConditionsOrFields;
+    }
 
     if (Array.isArray(conditionsOrFields) || typeof conditionsOrFields === 'string') {
       rule.fields = conditionsOrFields;

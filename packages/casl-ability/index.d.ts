@@ -3,6 +3,7 @@ export interface RawRule {
   actions: string | string[],
   fields?: string[],
   conditions?: Object,
+  scope?: Function | Function[],
   inverted?: boolean,
   reason?: string
 }
@@ -53,9 +54,13 @@ export abstract class AbilityBuilderParts {
 
   can(action: string | string[], subject: any | any[], conditions?: Object): RuleBuilder
   can(action: string | string[], subject: any | any[], fields?: string[], conditions?: Object): RuleBuilder
+  can(action: string | string[], subject: any | any[], scope?: Function, conditions?: Object): RuleBuilder
+  can(action: string | string[], subject: any | any[], scope?: Function, fields?: string[], conditions?: Object): RuleBuilder
 
   cannot(action: string | string[], subject: any | any[], conditions?: Object): RuleBuilder
   cannot(action: string | string[], subject: any | any[], fields?: string[], conditions?: Object): RuleBuilder
+  cannot(action: string | string[], subject: any | any[], scope?: Function | Function[], conditions?: Object): RuleBuilder
+  cannot(action: string | string[], subject: any | any[], scope?: Function | Function[], fields?: string[], conditions?: Object): RuleBuilder
 }
 
 export class AbilityBuilder extends AbilityBuilderParts {

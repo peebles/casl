@@ -12,9 +12,25 @@ export class Rule {
     this.conditions = params.conditions;
     this._matches = this.conditions ? sift(this.conditions) : undefined;
     this.reason = params.reason;
+    this.scope = params.scope;
   }
 
   matches(object) {
+    let scope = true;
+    if (typeof object !== 'string') {
+      if (this.scope) {
+        if (Array.isArray(this.scope)) {
+          for (let i = 0; i < this.scope.length; i++) {
+            const res = this.scope[i](object, this);
+            if (!res) scope = res;
+          }
+        } else {
+          scope = this.scope(object, this);
+        }
+      }
+      if (scope === false) return !!this.inverted;
+    }
+
     if (!this._matches) {
       return true;
     }

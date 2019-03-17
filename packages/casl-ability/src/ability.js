@@ -97,14 +97,22 @@ export class Ability {
     return this[PRIVATE_FIELD].originalRules;
   }
 
+  // A subject might be an object (not a class) and not be otherwise identifiable
+  // via a custom subjectName() function.  In that case, you can pass an array for the
+  // subject: [ subject, 'SubjectName' ].
   can(action, subject, field) {
-    const rule = this.relevantRuleFor(action, subject, field);
+    let subjectName;
+    let subjectParam = subject;
+    if (Array.isArray(subject)) {
+      [subjectParam, subjectName] = subject;
+    }
+    const rule = this.relevantRuleFor(action, subjectParam, field, subjectName);
 
     return !!rule && !rule.inverted;
   }
 
-  relevantRuleFor(action, subject, field) {
-    const rules = this.rulesFor(action, subject, field);
+  relevantRuleFor(action, subject, field, subjectName) {
+    const rules = this.rulesFor(action, subject, field, subjectName);
 
     for (let i = 0; i < rules.length; i++) {
       if (rules[i].matches(subject)) {
@@ -115,8 +123,8 @@ export class Ability {
     return null;
   }
 
-  possibleRulesFor(action, subject) {
-    const subjectName = this[PRIVATE_FIELD].subjectName(subject);
+  possibleRulesFor(action, subject, _subjectName) {
+    const subjectName = _subjectName || this[PRIVATE_FIELD].subjectName(subject);
     const { mergedRules } = this[PRIVATE_FIELD];
     const key = `${subjectName}_${action}`;
 
@@ -144,9 +152,9 @@ export class Ability {
     return mergedRules.filter(Boolean);
   }
 
-  rulesFor(action, subject, field) {
+  rulesFor(action, subject, field, subjectName) {
     // TODO: skip `isRelevantFor` method calls if there are not fields in rules
-    return this.possibleRulesFor(action, subject)
+    return this.possibleRulesFor(action, subject, subjectName)
       .filter(rule => rule.isRelevantFor(subject, field));
   }
 
@@ -154,17 +162,22 @@ export class Ability {
     return !this.can(...args);
   }
 
-  throwUnlessCan(...args) {
-    const rule = this.relevantRuleFor(...args);
+  throwUnlessCan(action, subject, field) {
+    let subjectTag;
+    let subjectParam = subject;
+    if (Array.isArray(subject)) {
+      [subjectParam, subjectTag] = subject;
+    }
+
+    const rule = this.relevantRuleFor(action, subjectParam, field, subjectTag);
 
     if (!rule || rule.inverted) {
-      const [action, subject, field] = args;
-      const subjectName = this[PRIVATE_FIELD].subjectName(subject);
+      const subjectName = subjectTag || this[PRIVATE_FIELD].subjectName(subjectParam);
 
       throw new ForbiddenError(rule ? rule.reason : null, {
         action,
         subjectName,
-        subject,
+        subject: subjectParam,
         field
       });
     }
